@@ -50,8 +50,80 @@ regd_users.post("/login", (req, res) => {
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
     //Write your code here
-    return res.status(300).json({ message: "Yet to be implemented" });
+    const isbn = req.params.isbn; // Extract ISBN from request parameters
+    const review = req.query.review; // Extract review from request query
+    const username = req.session.authorization?.username; // Get username from session
+
+    // Check if the user is logged in
+    if (!username) {
+        return res.status(403).json({ message: "User not logged in" });
+    }
+
+    // Check if the ISBN exists in the books object
+    if (!books[isbn]) {
+        return res.status(404).json({ message: "Book not found" });
+    }
+
+    // Check if the user has already posted a review for this ISBN
+    if (books[isbn].reviews[username]) {
+        // Update the existing review
+        books[isbn].reviews[username] = review;
+        return res.status(200).json({ message: "Review updated successfully" });
+    } else {
+        // Add a new review
+        books[isbn].reviews[username] = review;
+        return res.status(200).json({ message: "Review added successfully" });
+    }
+    /* 
+    Test Request:
+
+    URL: http://localhost:3333/customer/auth/review/1?review=This is an updated review!
+
+    Header:
+
+    Key: Authorization
+
+    Value: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+    */
+    //return res.status(300).json({ message: "Yet to be implemented" });
 });
+
+// Delete a book review
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+    const isbn = req.params.isbn; // Extract ISBN from request parameters
+    const username = req.session.authorization?.username; // Get username from session
+  
+    // Check if the user is logged in
+    if (!username) {
+      return res.status(403).json({ message: "User not logged in" });
+    }
+  
+    // Check if the ISBN exists in the books object
+    if (!books[isbn]) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+  
+    // Check if the user has posted a review for this ISBN
+    if (books[isbn].reviews[username]) {
+      // Delete the review
+      delete books[isbn].reviews[username];
+      return res.status(200).json({ message: "Review deleted successfully" });
+    } else {
+      // Return error if the user has not posted a review for this ISBN
+      return res.status(404).json({ message: "Review not found" });
+    }
+    /* 
+    Set the request type to DELETE.
+
+    Enter the URL: http://localhost:3333/customer/auth/review/1 (replace 1 with a valid ISBN).
+
+    Go to the Headers tab and add the Authorization header:
+
+    Key: Authorization
+
+    Value: Bearer <token> (replace <token> with the actual token).
+    */
+  });
 
 
 module.exports.authenticated = regd_users;
