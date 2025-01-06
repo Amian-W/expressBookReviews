@@ -40,6 +40,10 @@ app.use("/customer/auth/*", function auth(req, res, next) {
 
 const PORT = 3333;
 
+// Mount customer routes
+app.use("/customer", customer_routes);
 
+// Mount general routes
+app.use("/", genl_routes);
 
 app.listen(PORT, () => console.log("Server is running"));
